@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema({
+const DoctorSchema = new mongoose.Schema({
   name: {
     type: String,
     trim: true,
@@ -21,9 +21,8 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "password required"],
-    minLength: [6, "Too short password"],
+    minLength: [8, "Too short password"],
   },
-  age: Number,
   phone: String,
   ID: String,
   location: String,
@@ -39,15 +38,20 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
 
+  patients: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Patient",
+  }],
+
   passwordChangedAt: Date,
   passwordResetCode: String,
   passwordResetExpires: Date,
   passwordResetVerified: Boolean,
 });
 
-userSchema.pre("save", function (next) {
+DoctorSchema.pre("save", function (next) {
   this.password = bcrypt.hashSync(this.password, 12);
   next();
 });
 
-module.exports = mongoose.model("Doctor", userSchema);
+module.exports = mongoose.model("Doctor", DoctorSchema);

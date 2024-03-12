@@ -1,28 +1,26 @@
 const express = require("express");
 const morgan = require("morgan");
 const dotenv = require("dotenv");
-const session = require("express-session");
-const passport = require("passport");
 
 dotenv.config({ path: "config.env" });
 
 const dbConnection = require("./config/database");
 const ApiError = require("./utils/ApiError");
-const createToken = require("./utils/createToken");
 const globalError = require("./middlewares/errorMiddleware");
 
 const authRoute = require("./routes/authRoute");
 const doctorInfoRoute = require("./routes/doctorInfoRoute");
+const appointmentRoute = require("./routes/appointmentRoute");
+const requestRoute = require("./routes/requestRoute");
+const patientRoute = require("./routes/patientRoute");
+const sessionRoute = require("./routes/sessionRoute");
+const medicalTestRoute = require("./routes/medicalTestRoute");
+const medicineRoute = require("./routes/medicineRoute");
 
-require("./auth");
 
 dbConnection();
 
 const app = express();
-
-app.use(session({ secret: "cats", resave: false, saveUninitialized: true }));
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.use(express.json());
 
@@ -31,46 +29,17 @@ if (process.env.NODE_ENV === "development") {
   console.log(`mode: ${process.env.NODE_ENV}`);
 }
 
-app.get("/", (req, res) => {
-  res.send('<a href="/auth/google">Authenticate with Google</a>');
-});
-
-app.get(
-  "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
-
-app.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/auth/google/failure",
-    successRedirect: "/protected",
-  })
-);
-
-function isLoggedIn(req, res, next) {
-  req.user ? next() : res.sendStatus(401);
-}
-
-app.get("/protected", isLoggedIn, (req, res) => {
-  const token = createToken(req.user._id);
-  console.log(req.user);
-  res.status(200).json({ data: req.user, token });
-});
-
-app.get("/logout", (req, res) => {
-  req.logout();
-  req.session.destroy();
-  res.send("Goodbye!");
-});
-
-app.get("/auth/google/failure", (req, res) => {
-  res.send("Failed to authenticate..");
-});
-
 //Mount Routes
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/doctor", doctorInfoRoute);
+app.use("/api/v1/appointments", appointmentRoute);
+app.use("/api/v1/requests", requestRoute);
+app.use("/api/v1/patients", patientRoute);
+app.use("/api/v1/sessions", sessionRoute);
+app.use("/api/v1/sessions", sessionRoute);
+app.use("/api/v1/medicaltests", medicalTestRoute);
+app.use("/api/v1/medicine", medicineRoute);
+
 
 // Handel unhandelling Routes
 app.all("*", (req, res, next) => {

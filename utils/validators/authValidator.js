@@ -84,8 +84,8 @@ exports.verifyPassResetCodeValidator = [
     .withMessage("Reset code required")
     .isLength({ min: 4 })
     .withMessage("reset code must be 4 numbers")
-    .isLength({ max: 6 })
-    .withMessage("reset code must be 6 numbers"),
+    .isLength({ max: 4 })
+    .withMessage("reset code must be 4 numbers"),
   validatorMiddleware,
 ];
 

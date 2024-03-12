@@ -57,13 +57,14 @@ exports.protect = asyncHandler(async (req, res, next) => {
 //@desc  Authorization (user Permissions)
 exports.allowTo = (...roles) =>
   asyncHandler(async (req, res, next) => {
-    if (!roles.includes(req.doctor.role)) {
+    if (!roles.includes(req.user.role)) {
       return next(
         new ApiError("you are not allowed to access this router", 403)
       );
     }
     next();
   });
+
 
 // @desc    Forgot password
 // @route   POST /api/v1/auth/forgotpassword
@@ -76,9 +77,8 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
       new ApiError(`No doctor for this email : ${req.body.email}`, 404)
     );
   }
-  // 2) If doctor exists, Generate hash rest random 6 digits.
+  // 2) If doctor exists, Generate hash rest random 4 digits.
   const resetCode = Math.floor(1000 + Math.random() * 9000).toString();
-
   const hashResetCode = crypto
     .createHash("sha256")
     .update(resetCode)
@@ -166,5 +166,5 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 
   //3) if every thing is okay, generate token
   const token = createToken(doctor._id);
-  res.status(200).json({ token });
+  res.status(200).json({ user,token });
 });
